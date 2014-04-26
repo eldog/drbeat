@@ -1,12 +1,19 @@
 class @Synth
-  constructor: (@ctx) ->
+  constructor: (@ctx, type) ->
+    @oscillator = @ctx.createOscillator()
+    @oscillator.type = type
+    @gain = @ctx.createGain()
+    @gain.gain.value = 0
+    @oscillator.connect(@gain)
+    @gain.connect(@ctx.destination)
+    @oscillator.start(0)
 
   playNote: (frequency, length) ->
-    oscillator = @ctx.createOscillator()
-    oscillator.frequency.value = frequency
-    oscillator.connect(@ctx.destination)
-    oscillator.start(0)
-    Meteor.setTimeout ->
-      oscillator.stop()
+    if @handle
+      Meteor.clearTimeout @handle
+    @oscillator.frequency.value = frequency
+    @gain.gain.value = 0.5
+    @handle = Meteor.setTimeout =>
+      @gain.gain.value = 0
     , length
 

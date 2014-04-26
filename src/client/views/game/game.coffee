@@ -1,13 +1,13 @@
 WORLD = '''
 
-
+                         B B
                         ###########
 
 
+              B    B
+          ############
 
-
-
-
+                                                      ##########
 
 
                                       #####
@@ -23,9 +23,9 @@ WORLD = '''
 
 
 
-            ####
+            ####                                                      BB
 
-
+                            B                                   ##########
                             ##
                                                   #####
 
@@ -44,6 +44,8 @@ Template.game.rendered = ->
     player: 'player0.png'
     pow: 'pow.png'
     ground: 'ground.png'
+    badguy: 'badguy.png'
+    badPow: 'bad-pow.png'
     world:
       map: WORLD
       width: 2048
