@@ -8,12 +8,24 @@ class @Synth
     @gain.connect(@ctx.destination)
     @oscillator.start(0)
 
-  playNote: (frequency, length) ->
+  playNote: (frequency, length, volume, @endNote) ->
     if @handle
       Meteor.clearTimeout @handle
     @oscillator.frequency.value = frequency
-    @gain.gain.value = 0.5
+    unless volume?
+      volume = 0.5
+    @gain.gain.value = volume
+    @length = length
+    if @endNote?
+      @length /= 2
     @handle = Meteor.setTimeout =>
-      @gain.gain.value = 0
-    , length
+      if @endNote
+        @endNote = null
+        @oscillator.frequency.value = frequency
+        @handle = Meteor.setTimeout =>
+          @gain.gain.value = 0
+        , @length
+      else
+        @gain.gain.value = 0
+    , @length
 

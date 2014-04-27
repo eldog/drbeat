@@ -4,6 +4,10 @@
     "iron-router": {}
   },
   "bower": {
+    "html5-virtual-game-controller": {
+      "source": "austinhallock/html5-virtual-game-controller",
+      "version": "master"
+    },
     "phaser": {
       "source": "photonstorm/phaser",
       "version": "2.0.3"
