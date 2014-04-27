@@ -4,6 +4,7 @@ class @WorldState
     [1, 0,  0, 0,  0, 0,  0, 0,  1, 0,  0, 0,  0, 1,  0, 0,  ]
     [4, 0,  4, 0,  4, 4,  0, 0,  0, 0,  0, 0,  0, 0,  0, 0,  ]
     [0, 0,  0, 0,  0, 0,  0, 5,  5, 5,  0, 5,  5, 0,  0, 0,  ]
+    [0, 0,  0, 0,  6, 6,  0, 6,  0, 0,  0, 0,  6, 6,  0, 6,  ]
   ]
 
   TEXT =
@@ -62,10 +63,12 @@ class @WorldState
     @game.load.image('background', @config.background)
     @game.load.image('#', @config.ground)
     @game.load.image('pow', @config.pow)
-    @game.load.image('badguy', @config.badguy)
+    @game.load.spritesheet('badguy', 'badguy.png', 16, 16, 2)
     @game.load.image('bad-pow', @config.badPow)
-    @game.load.image('badguy2', @config.badguy2)
+    @game.load.spritesheet('badguy2', @config.badguy2, 16, 16, 2)
+    @game.load.spritesheet('badguy3', 'badguy3.png', 16, 16, 2)
     @game.load.image('bad-pow2', @config.badPow2)
+    @game.load.image('bad-pow3', 'bad-pow3.png')
     @game.load.image('-', @config.paving)
     @game.load.image('sky', 'sky.png')
     @game.load.image('d', 'dude.png')
@@ -138,6 +141,10 @@ class @WorldState
     badguy.body.mass = 1
     badguy.body.drag.setTo(10000, 0)
     group.add(badguy)
+    badguy.health = 1
+    badguy.animations.add('bad', [0], 1, true)
+    badguy.animations.add('good', [1], 1, true)
+    badguy.animations.play('bad')
 
   reset: ->
     #for badguyGroup in @badguyGroups
@@ -219,11 +226,12 @@ class @WorldState
     @ground = @game.add.group()
     @badguys = @game.add.group()
     @badguys2 = @game.add.group()
+    @badguys3 = @game.add.group()
     @encounters = @game.add.group()
     @checkpoints = @game.add.group()
     @tapes = @game.add.group()
 
-    @badguyGroups = [@badguys, @badguys2]
+    @badguyGroups = [@badguys, @badguys2, @badguys3]
 
     @badguyPowPool = @game.add.group()
     @badguyPowPool.spriteName = 'bad-pow'
@@ -232,7 +240,11 @@ class @WorldState
     @badguyPowPool2.spriteName = 'bad-pow2'
     @badguyPowPool2.allowGravity = false
 
-    @badguyPowPools = [@badguyPowPool, @badguyPowPool2]
+    @badguyPowPool3 = @game.add.group()
+    @badguyPowPool3.spriteName = 'bad-pow3'
+    @badguyPowPool3.allowGravity = true
+
+    @badguyPowPools = [@badguyPowPool, @badguyPowPool2, @badguyPowPool3]
 
     lines = @config.world.map.split('\n')
     backgroundLines = 0
@@ -257,6 +269,9 @@ class @WorldState
             @createBadguy(x, positionY, 'badguy', @badguys, 880, -200)
           if character == 'C'
             @createBadguy(x, positionY, 'badguy2', @badguys2, 880 * 2, 0)
+          if character == 'D'
+            console.log 'asfa'
+            @createBadguy(x, positionY, 'badguy3', @badguys3, 880 / 4, -500)
           if character == 'K'
             @createCheckpoint(x, positionY)
           if character in ['1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -379,7 +394,9 @@ class @WorldState
       @game.physics.arcade.collide(badguyGroup, @player)
       @game.physics.arcade.collide @powPool, badguyGroup, (pow, badGuy) =>
         pow.kill()
-        badGuy.kill()
+        badGuy.health = 0
+        badGuy.animations.play('good')
+        #badGuy.kill()
         # experimental
         #badguyGroup.remove(badGuy)
         #@badguys.add(badGuy)
@@ -440,10 +457,16 @@ class @WorldState
                 @highHatSynth.playNote(@player.y * HIGH_HAT_PITCH / @game.world.height, noteLength)
               when 4
                 @badguys.forEachAlive (badGuy) =>
-                  @badGuyShoot(badGuy, @badguyPowPool)
+                  if badGuy.health > 0
+                    @badGuyShoot(badGuy, @badguyPowPool)
               when 5
                 @badguys2.forEachAlive (badGuy) =>
-                  @badGuyShoot(badGuy, @badguyPowPool2)
+                  if badGuy.health > 0
+                    @badGuyShoot(badGuy, @badguyPowPool2)
+              when 6
+                @badguys3.forEachAlive (badGuy) =>
+                  if badGuy.health > 0
+                    @badGuyShoot(badGuy, @badguyPowPool3)
 
         @sequenceIndex = (@sequenceIndex + 1) % @sequence[0].length
         @last = now
